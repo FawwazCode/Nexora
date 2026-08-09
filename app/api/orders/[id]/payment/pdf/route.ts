@@ -1,9 +1,15 @@
 import { NextResponse } from "next/server";
-import { renderToBuffer } from "@react-pdf/renderer";
-import React from "react";
+import {
+  renderToBuffer,
+  DocumentProps,
+} from "@react-pdf/renderer";
+import React, { ReactElement } from "react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { PaymentPdfDocument, PaymentPdfData } from "@/lib/pdf/payment-pdf";
+import {
+  PaymentPdfDocument,
+  PaymentPdfData,
+} from "@/lib/pdf/payment-pdf";
 import { Role } from "@prisma/client";
 
 export async function GET(
@@ -15,7 +21,10 @@ export async function GET(
     const session = await auth();
 
     if (!session?.user) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { message: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
     const userId = session.user.id;
@@ -24,14 +33,26 @@ export async function GET(
     const order = await prisma.order.findUnique({
       where: { id },
       include: {
-        user: { select: { id: true, name: true, email: true, phone: true } },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+          },
+        },
         address: true,
         payment: true,
         items: {
           include: {
             variant: {
               include: {
-                product: { select: { name: true, slug: true } },
+                product: {
+                  select: {
+                    name: true,
+                    slug: true,
+                  },
+                },
               },
             },
           },
@@ -40,18 +61,33 @@ export async function GET(
     });
 
     if (!order) {
-      return NextResponse.json({ message: "Order not found" }, { status: 404 });
-    }
-
-    // Security Check: Customer can only access their own order's payment receipt
-    if (role === Role.CUSTOMER && order.userId !== userId) {
-      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
-    }
-
-    // Business Rule Check: Only allow receipt download for paid orders
-    if (order.paymentStatus !== "PAID" || !order.payment || order.payment.status !== "PAID") {
       return NextResponse.json(
-        { message: "Payment receipt is only available for paid orders" },
+        { message: "Order not found" },
+        { status: 404 }
+      );
+    }
+
+    // Security Check:
+    // Customer can only access their own order's payment receipt.
+    if (role === Role.CUSTOMER && order.userId !== userId) {
+      return NextResponse.json(
+        { message: "Forbidden" },
+        { status: 403 }
+      );
+    }
+
+    // Business Rule Check:
+    // Only allow receipt download for paid orders.
+    if (
+      order.paymentStatus !== "PAID" ||
+      !order.payment ||
+      order.payment.status !== "PAID"
+    ) {
+      return NextResponse.json(
+        {
+          message:
+            "Payment receipt is only available for paid orders",
+        },
         { status: 400 }
       );
     }
@@ -59,41 +95,76 @@ export async function GET(
     const grandTotal = Number(order.grandTotal);
     const subtotal = Number(order.subtotal);
     const shippingCost = Number(order.shippingCost);
-    const paidAmount = Number(order.payment.paidAmount ?? grandTotal);
-    const changeAmount = Number(order.payment.changeAmount ?? 0);
-    const paymentAmount = Number(order.payment.amount ?? grandTotal);
+    const paidAmount = Number(
+      order.payment.paidAmount ?? grandTotal
+    );
+    const changeAmount = Number(
+      order.payment.changeAmount ?? 0
+    );
+    const paymentAmount = Number(
+      order.payment.amount ?? grandTotal
+    );
 
     const pdfData: PaymentPdfData = {
       paymentId: order.payment.id,
+
       paymentMethod: order.payment.method || "MANUAL",
+
       paymentStatus: order.payment.status,
+
       paymentAmount,
+
       paidAmount,
+
       changeAmount,
+
       paidAt: order.payment.paidAt?.toISOString(),
+
       note: order.payment.note || undefined,
 
       orderNumber: order.orderNumber,
-      orderDate: new Date(order.createdAt).toLocaleDateString("en-US", {
+
+      orderDate: new Date(
+        order.createdAt
+      ).toLocaleDateString("en-US", {
         year: "numeric",
         month: "short",
         day: "numeric",
       }),
+
       subtotal,
+
       shippingCost,
+
       grandTotal,
 
-      customerName: order.user.name || order.address.receiverName || "Customer",
+      customerName:
+        order.user.name ||
+        order.address.receiverName ||
+        "Customer",
+
       customerEmail: order.user.email,
-      customerPhone: order.address.phone || order.user.phone || undefined,
+
+      customerPhone:
+        order.address.phone ||
+        order.user.phone ||
+        undefined,
+
       receiverName: order.address.receiverName,
+
       fullAddress: `${order.address.fullAddress}, ${order.address.city}, ${order.address.province} (${order.address.postalCode})`,
 
       items: order.items.map((item) => {
         const price = Number(item.price);
-        const specs = [item.variant.color, item.variant.ram, item.variant.storage]
+
+        const specs = [
+          item.variant.color,
+          item.variant.ram,
+          item.variant.storage,
+        ]
           .filter(Boolean)
           .join(" / ");
+
         return {
           name: item.variant.product.name,
           sku: item.variant.sku,
@@ -103,19 +174,25 @@ export async function GET(
           subtotal: price * item.quantity,
         };
       }),
+
       generatedAt: new Date().toLocaleString("en-US", {
         dateStyle: "medium",
         timeStyle: "short",
       }),
     };
 
-    const pdfBuffer = await renderToBuffer(
-      React.createElement(PaymentPdfDocument, { data: pdfData })
-    );
+    const pdfDocument = React.createElement(
+      PaymentPdfDocument,
+      { data: pdfData }
+    ) as ReactElement<DocumentProps>;
+
+    const pdfBuffer = await renderToBuffer(pdfDocument);
 
     const filename = `Nexora-Payment-${order.orderNumber}.pdf`;
 
-    return new NextResponse(pdfBuffer, {
+    const pdfBody = new Uint8Array(pdfBuffer);
+
+    return new NextResponse(pdfBody, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
@@ -124,7 +201,14 @@ export async function GET(
       },
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unexpected error";
-    return NextResponse.json({ message }, { status: 500 });
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Unexpected error";
+
+    return NextResponse.json(
+      { message },
+      { status: 500 }
+    );
   }
 }

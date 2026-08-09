@@ -44,7 +44,7 @@ export async function POST(request: Request) {
 
     if (!validation.success) {
       return NextResponse.json(
-        { message: validation.error.errors[0]?.message || "Invalid payload" },
+        { message: validation.error.issues[0]?.message || "Invalid payload" },
         { status: 400 }
       );
     }

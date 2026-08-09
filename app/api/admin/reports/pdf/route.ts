@@ -1,48 +1,71 @@
 import { NextResponse } from "next/server";
-import { renderToBuffer } from "@react-pdf/renderer";
-import React from "react";
+import {
+  renderToBuffer,
+  DocumentProps,
+} from "@react-pdf/renderer";
+import React, { ReactElement } from "react";
 import { auth } from "@/lib/auth";
-import { assertSuperAdmin } from "@/lib/admin/permissions";
+import { canManageProducts } from "@/lib/admin/permissions";
 import { getAdminReports } from "@/lib/admin/services";
-import { ReportsPdfDocument, ReportsPdfData } from "@/lib/pdf/reports-pdf";
+import {
+  ReportsPdfDocument,
+  ReportsPdfData,
+} from "@/lib/pdf/reports-pdf";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const session = await auth();
     const role = (session?.user as { role?: string } | null | undefined)?.role;
 
-    assertSuperAdmin(role);
+    if (!role || !canManageProducts(role)) {
+      return NextResponse.json(
+        { message: "Forbidden" },
+        { status: 403 }
+      );
+    }
 
-    const reports = await getAdminReports();
+    const reportsData = await getAdminReports();
 
     const pdfData: ReportsPdfData = {
-      revenue: reports.revenue,
-      totalOrders: reports.totalOrders,
-      newCustomers: reports.newCustomers,
-      monthlySales: reports.monthlySales.map((s) => ({
-        createdAt: s.createdAt,
-        grandTotal: Number(s._sum.grandTotal ?? 0),
+      revenue: reportsData.revenue,
+
+      monthlySales: reportsData.monthlySales.map((item) => ({
+        createdAt: item.createdAt,
+        grandTotal: Number(item._sum.grandTotal ?? 0),
       })),
-      bestSellingProducts: reports.bestSellingProducts.map((p) => ({
-        id: p.id,
-        sku: p.sku,
-        stock: p.stock,
-        soldQuantity: p.soldQuantity,
-        productName: p.product.name,
+
+      totalOrders: reportsData.totalOrders,
+
+      bestSellingProducts: reportsData.bestSellingProducts.map((item) => ({
+        id: item.id,
+        sku: item.sku,
+        stock: item.stock,
+        soldQuantity: item.soldQuantity,
+        productName: item.product.name,
       })),
+
+      newCustomers: reportsData.newCustomers,
+
       generatedAt: new Date().toLocaleString("en-US", {
         dateStyle: "medium",
         timeStyle: "short",
       }),
     };
 
-    const pdfBuffer = await renderToBuffer(
-      React.createElement(ReportsPdfDocument, { data: pdfData })
-    );
+    const pdfDocument = React.createElement(
+      ReportsPdfDocument,
+      { data: pdfData }
+    ) as ReactElement<DocumentProps>;
 
-    const filename = `Nexora-Report-${new Date().toISOString().slice(0, 10)}.pdf`;
+    const pdfBuffer = await renderToBuffer(pdfDocument);
 
-    return new NextResponse(pdfBuffer, {
+    const filename = `Nexora-Report-${new Date()
+      .toISOString()
+      .slice(0, 10)}.pdf`;
+
+    const pdfBody = new Uint8Array(pdfBuffer);
+
+    return new NextResponse(pdfBody, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
@@ -51,8 +74,9 @@ export async function GET() {
       },
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unexpected error";
-    const status = message === "Forbidden" ? 403 : 500;
-    return NextResponse.json({ message }, { status });
+    const message =
+      error instanceof Error ? error.message : "Unexpected error";
+
+    return NextResponse.json({ message }, { status: 500 });
   }
 }

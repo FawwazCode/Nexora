@@ -43,36 +43,41 @@ export default async function ProductDetailPage({
 
   return (
     <main className="min-h-screen bg-white">
-      <section className="border-b border-zinc-200 bg-gradient-to-b from-[#7F46FA]/5 to-white">
-        <div className="mx-auto flex max-w-7xl flex-col gap-10 px-4 py-16 sm:px-6 lg:px-8 lg:flex-row">
+      <section className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
+        <div className="flex flex-col gap-12 lg:flex-row lg:items-center">
           {/* Product Image */}
           <div className="w-full lg:w-1/2">
-            <div className="relative aspect-square overflow-hidden rounded-3xl border border-zinc-200 bg-zinc-100 shadow-sm">
-              <Image
-                src={product.image}
-                alt={product.name}
-                fill
-                className="object-cover"
-                unoptimized
-                alt={product.name}
-                fill
-                className="object-cover"
-                priority
-                sizes="(max-width:1024px) 100vw, 50vw"
-              />
+            <div className="relative aspect-square overflow-hidden rounded-3xl bg-zinc-100">
+              {product.image ? (
+                <Image
+                  src={product.image}
+                  alt={product.name}
+                  fill
+                  className="object-cover"
+                  priority
+                  unoptimized
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center text-zinc-400">
+                  No image available
+                </div>
+              )}
             </div>
           </div>
 
           {/* Product Info */}
           <div className="flex w-full flex-col justify-center lg:w-1/2">
-            <nav aria-label="Breadcrumb" className="text-sm text-zinc-500">
-              <ol className="flex items-center gap-2">
+            <nav
+              aria-label="Breadcrumb"
+              className="text-sm text-zinc-500"
+            >
+              <ol className="flex flex-wrap items-center gap-2">
                 <li>
                   <Link
                     href="/dashboard"
                     className="transition hover:text-[#7F46FA]"
                   >
-                    Dashboard 
+                    Dashboard
                   </Link>
                 </li>
 
@@ -114,6 +119,7 @@ export default async function ProductDetailPage({
             <div className="mt-8 space-y-3 rounded-2xl border border-zinc-200 bg-zinc-50 p-5">
               <div className="flex justify-between">
                 <span className="text-zinc-500">Category</span>
+
                 <span className="font-medium">
                   {product.category}
                 </span>
@@ -121,6 +127,7 @@ export default async function ProductDetailPage({
 
               <div className="flex justify-between">
                 <span className="text-zinc-500">Stock</span>
+
                 <span className="font-medium">
                   {product.stock > 0
                     ? `${product.stock} Available`
@@ -130,11 +137,17 @@ export default async function ProductDetailPage({
             </div>
 
             <div className="mt-8 space-y-4">
-              <AddToCartButton variantId={product.variantId} stock={product.stock} />
+              <AddToCartButton
+                variantId={product.variantId}
+                stock={product.stock}
+              />
 
               <div className="pt-2">
                 <Link href="/products">
-                  <Button variant="outline" className="w-full sm:w-auto">
+                  <Button
+                    variant="outline"
+                    className="w-full sm:w-auto"
+                  >
                     Back to products
                   </Button>
                 </Link>

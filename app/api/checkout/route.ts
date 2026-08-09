@@ -21,7 +21,7 @@ export async function POST(request: Request) {
 
     if (!validation.success) {
       return NextResponse.json(
-        { message: validation.error.errors[0]?.message || "Invalid checkout payload" },
+        { message: validation.error.issues[0]?.message || "Invalid checkout payload" },
         { status: 400 }
       );
     }

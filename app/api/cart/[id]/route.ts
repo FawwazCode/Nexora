@@ -25,7 +25,7 @@ export async function PATCH(
 
     if (!validation.success) {
       return NextResponse.json(
-        { message: validation.error.errors[0]?.message || "Invalid quantity" },
+        { message: validation.error.issues[0]?.message || "Invalid quantity" },
         { status: 400 }
       );
     }
