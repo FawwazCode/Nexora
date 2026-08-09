@@ -1,15 +1,25 @@
-import { Role } from "@prisma/client";
+const ROLES = {
+  SUPER_ADMIN: "SUPER_ADMIN",
+  CATALOG_ADMIN: "CATALOG_ADMIN",
+  ORDER_SPECIALIST: "ORDER_SPECIALIST",
+} as const;
 
 export function assertSuperAdmin(role?: string | null) {
-  if (role !== Role.SUPER_ADMIN) {
+  if (role !== ROLES.SUPER_ADMIN) {
     throw new Error("Forbidden");
   }
 }
 
 export function canManageProducts(role?: string | null) {
-  return role === Role.SUPER_ADMIN || role === Role.CATALOG_ADMIN;
+  return (
+    role === ROLES.SUPER_ADMIN ||
+    role === ROLES.CATALOG_ADMIN
+  );
 }
 
 export function canManageOrders(role?: string | null) {
-  return role === Role.SUPER_ADMIN || role === Role.ORDER_SPECIALIST;
+  return (
+    role === ROLES.SUPER_ADMIN ||
+    role === ROLES.ORDER_SPECIALIST
+  );
 }
