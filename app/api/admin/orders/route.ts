@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { canManageOrders } from "@/lib/admin/permissions";
-import { listOrders, getOrderDetail, updateOrderStatus } from "@/lib/admin/services";
-import { orderListSchema, orderStatusSchema } from "@/lib/admin/validation";
+import { listOrders, getOrderDetail, updateOrderStatus, adminUpdatePaymentStatus, adminUpdateShipmentStatus } from "@/lib/admin/services";
+import { orderListSchema } from "@/lib/admin/validation";
+import { OrderStatus, PaymentStatus, ShipmentStatus } from "@prisma/client";
 
 export async function GET(request: Request) {
   try {
@@ -49,19 +50,27 @@ export async function PATCH(request: Request) {
     }
 
     const body = await request.json();
-    const parsed = orderStatusSchema.safeParse(body);
+    const { id, status, paymentStatus, shipmentStatus, note, trackingNumber, courierId } = body;
 
-    if (!parsed.success) {
-      return NextResponse.json({ message: parsed.error.flatten().fieldErrors }, { status: 400 });
+    if (!id) {
+      return NextResponse.json({ message: "Missing order id" }, { status: 400 });
     }
 
-    if (!body.id) {
-      return NextResponse.json({ message: "Missing id" }, { status: 400 });
+    let updatedOrder;
+
+    if (paymentStatus) {
+      updatedOrder = await adminUpdatePaymentStatus(id, paymentStatus as PaymentStatus, note);
+    } else if (shipmentStatus) {
+      updatedOrder = await adminUpdateShipmentStatus(id, shipmentStatus as ShipmentStatus, trackingNumber, courierId);
+    } else if (status) {
+      updatedOrder = await updateOrderStatus(id, status as OrderStatus);
+    } else {
+      return NextResponse.json({ message: "No status field provided to update" }, { status: 400 });
     }
 
-    const order = await updateOrderStatus(body.id, parsed.data.status);
-    return NextResponse.json(order);
+    return NextResponse.json({ success: true, data: updatedOrder });
   } catch (error) {
-    return NextResponse.json({ message: error instanceof Error ? error.message : "Unexpected error" }, { status: 500 });
+    return NextResponse.json({ message: error instanceof Error ? error.message : "Unexpected error" }, { status: 400 });
   }
 }
+

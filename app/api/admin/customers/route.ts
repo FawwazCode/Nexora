@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { canManageOrders } from "@/lib/admin/permissions";
+import { canManageOrders, assertSuperAdmin } from "@/lib/admin/permissions";
 import { listCustomers, getCustomerDetail, toggleCustomerStatus } from "@/lib/admin/services";
 import { customerListSchema, customerToggleSchema } from "@/lib/admin/validation";
 
@@ -43,9 +43,7 @@ export async function PATCH(request: Request) {
     const session = await auth();
     const role = (session?.user as { role?: string } | null | undefined)?.role;
 
-    if (!canManageOrders(role)) {
-      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
-    }
+    assertSuperAdmin(role);
 
     const body = await request.json();
     const parsed = customerToggleSchema.safeParse(body);
@@ -61,6 +59,9 @@ export async function PATCH(request: Request) {
     const customer = await toggleCustomerStatus(body.id, parsed.data.isActive);
     return NextResponse.json(customer);
   } catch (error) {
-    return NextResponse.json({ message: error instanceof Error ? error.message : "Unexpected error" }, { status: 500 });
+    const message = error instanceof Error ? error.message : "Unexpected error";
+    const status = message === "Forbidden" ? 403 : 500;
+    return NextResponse.json({ message }, { status });
   }
 }
+

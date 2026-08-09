@@ -7,7 +7,7 @@ export type DashboardMenuItem = {
 
 export const dashboardMenus: Record<string, DashboardMenuItem[]> = {
   [Role.CUSTOMER]: [
-    { href: "/dashboard", label: "Overview" },
+    { href: "/customer", label: "Overview" },
     { href: "/customer/products", label: "Store Products" },
     { href: "/customer/wishlist", label: "Wishlist" },
     { href: "/orders", label: "My Orders" },
@@ -17,6 +17,8 @@ export const dashboardMenus: Record<string, DashboardMenuItem[]> = {
     { href: "/dashboard", label: "Overview" },
     { href: "/dashboard/products", label: "Products" },
     { href: "/dashboard/categories", label: "Categories" },
+    { href: "/dashboard/brands", label: "Brands" },
+    { href: "/dashboard/variants", label: "Product Variants" },
     { href: "/dashboard/inventory", label: "Inventory" },
   ],
   [Role.ORDER_SPECIALIST]: [
@@ -29,8 +31,14 @@ export const dashboardMenus: Record<string, DashboardMenuItem[]> = {
     { href: "/dashboard", label: "Overview" },
     { href: "/dashboard/products", label: "Products" },
     { href: "/dashboard/categories", label: "Categories" },
+    { href: "/dashboard/brands", label: "Brands" },
+    { href: "/dashboard/variants", label: "Product Variants" },
+    { href: "/dashboard/inventory", label: "Inventory" },
     { href: "/dashboard/orders", label: "Orders" },
     { href: "/dashboard/customers", label: "Customers" },
+    { href: "/dashboard/shipping", label: "Shipping" },
+    { href: "/dashboard/users", label: "Users" },
+    { href: "/dashboard/reports", label: "Reports" },
     { href: "/dashboard/settings", label: "Settings" },
   ],
 };

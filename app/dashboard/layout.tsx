@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getDashboardRedirect } from "@/lib/rbac";
 import DashboardNavbar from "@/components/layout/dashboard-navbar";
-import DashboardSidebar from "@/components/layout/dashboard-sidebar";
+import DashboardSidebar from "@/components/layout/dashboard-sidebar/dashboard-sidebar";
 
 export default async function DashboardLayout({
   children,

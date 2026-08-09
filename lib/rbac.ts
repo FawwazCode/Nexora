@@ -1,14 +1,17 @@
 import { Role } from "@prisma/client";
+import { canManageProducts, canManageOrders } from "./admin/permissions";
 
 export type AppRole = Role;
 
-const customerRoutes = ["/profile", "/wishlist", "/cart", "/checkout", "/orders"];
+const customerRoutes = ["/profile", "/wishlist", "/cart", "/checkout", "/orders", "/customer"];
 
 const dashboardAccessByRole: Record<string, string[]> = {
   [Role.CATALOG_ADMIN]: [
     "/dashboard",
     "/dashboard/products",
     "/dashboard/categories",
+    "/dashboard/brands",
+    "/dashboard/variants",
     "/dashboard/inventory",
   ],
   [Role.ORDER_SPECIALIST]: [
@@ -81,7 +84,49 @@ export function canAccessRoute(pathname: string, role?: string | null) {
   }
 
   if (isAdminApiRoute(normalized)) {
+    if (
+      normalized === "/api/admin/products" ||
+      normalized.startsWith("/api/admin/products/") ||
+      normalized === "/api/admin/categories" ||
+      normalized.startsWith("/api/admin/categories/") ||
+      normalized === "/api/admin/brands" ||
+      normalized.startsWith("/api/admin/brands/") ||
+      normalized === "/api/admin/variants" ||
+      normalized.startsWith("/api/admin/variants/") ||
+      normalized === "/api/admin/inventory" ||
+      normalized.startsWith("/api/admin/inventory/")
+    ) {
+      return canManageProducts(role);
+    }
+
+    if (
+      normalized === "/api/admin/orders" ||
+      normalized.startsWith("/api/admin/orders/") ||
+      normalized === "/api/admin/shipping" ||
+      normalized.startsWith("/api/admin/shipping/") ||
+      normalized === "/api/admin/customers" ||
+      normalized.startsWith("/api/admin/customers/")
+    ) {
+      return canManageOrders(role);
+    }
+
     return role === Role.SUPER_ADMIN;
+  }
+
+  if (normalized === "/dashboard/products" || normalized.startsWith("/dashboard/products/")) {
+    return canManageProducts(role);
+  }
+
+  if (normalized === "/dashboard/categories" || normalized.startsWith("/dashboard/categories/")) {
+    return canManageProducts(role);
+  }
+
+  if (normalized === "/dashboard/brands" || normalized.startsWith("/dashboard/brands/")) {
+    return canManageProducts(role);
+  }
+
+  if (normalized === "/dashboard/variants" || normalized.startsWith("/dashboard/variants/")) {
+    return canManageProducts(role);
   }
 
   if (isDashboardRoute(normalized)) {
@@ -90,7 +135,7 @@ export function canAccessRoute(pathname: string, role?: string | null) {
     }
 
     if (role === Role.CUSTOMER) {
-      return true;
+      return false;
     }
 
     const allowedDashboardRoutes = dashboardAccessByRole[role];
@@ -117,7 +162,15 @@ export function getDashboardRedirect(pathname: string, role?: string | null) {
   }
 
   if (role === Role.CUSTOMER) {
-    return null;
+    return "/customer";
+  }
+
+  if (normalized === "/dashboard/products" || normalized.startsWith("/dashboard/products/")) {
+    return canManageProducts(role) ? null : "/dashboard";
+  }
+
+  if (normalized === "/dashboard/categories" || normalized.startsWith("/dashboard/categories/")) {
+    return canManageProducts(role) ? null : "/dashboard";
   }
 
   if (role === Role.SUPER_ADMIN) {
@@ -132,3 +185,4 @@ export function getDashboardRedirect(pathname: string, role?: string | null) {
 
   return "/dashboard";
 }
+

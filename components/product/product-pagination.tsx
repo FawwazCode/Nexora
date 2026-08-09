@@ -1,39 +1,76 @@
+import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+type ProductPaginationProps = {
+  page: number;
+  totalPages: number;
+  totalItems: number;
+};
 
-const pages = [1, 2, 3] as const;
+export function ProductPagination({
+  page,
+  totalPages,
+  totalItems,
+}: ProductPaginationProps) {
+  if (totalPages <= 1) {
+    return null;
+  }
 
-export function ProductPagination() {
+  const pages = Array.from({ length: totalPages }, (_, index) => index + 1);
+
   return (
     <nav
-      className="flex items-center justify-center gap-2"
+      className="flex flex-wrap items-center justify-center gap-2"
       aria-label="Products pagination"
     >
-      <Button variant="outline" className="h-10 rounded-xl px-3">
-        <ChevronLeft className="h-4 w-4" aria-hidden="true" />
-        <span className="sr-only sm:not-sr-only">Previous</span>
-      </Button>
-
-      {pages.map((page) => (
-        <Button
-          key={page}
-          variant={page === 1 ? "default" : "outline"}
-          className={
-            page === 1
-              ? "h-10 w-10 rounded-xl bg-[#7F46FA] text-white hover:bg-[#6D3BE3]"
-              : "h-10 w-10 rounded-xl"
-          }
-          aria-current={page === 1 ? "page" : undefined}
+      {page > 1 ? (
+        <Link
+          href={`/products?page=${page - 1}`}
+          className="inline-flex h-10 items-center gap-2 rounded-xl border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100"
         >
-          {page}
-        </Button>
+          <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+          <span className="hidden sm:inline">Previous</span>
+        </Link>
+      ) : (
+        <span className="inline-flex h-10 cursor-not-allowed items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-100 px-3 text-sm text-zinc-400">
+          <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+          <span className="hidden sm:inline">Previous</span>
+        </span>
+      )}
+
+      {pages.map((p) => (
+        <Link
+          key={p}
+          href={`/products?page=${p}`}
+          aria-current={p === page ? "page" : undefined}
+          className={`inline-flex h-10 w-10 items-center justify-center rounded-xl border text-sm font-medium transition ${
+            p === page
+              ? "border-[#7F46FA] bg-[#7F46FA] text-white"
+              : "border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100"
+          }`}
+        >
+          {p}
+        </Link>
       ))}
 
-      <Button variant="outline" className="h-10 rounded-xl px-3">
-        <span className="sr-only sm:not-sr-only">Next</span>
-        <ChevronRight className="h-4 w-4" aria-hidden="true" />
-      </Button>
+      {page < totalPages ? (
+        <Link
+          href={`/products?page=${page + 1}`}
+          className="inline-flex h-10 items-center gap-2 rounded-xl border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100"
+        >
+          <span className="hidden sm:inline">Next</span>
+          <ChevronRight className="h-4 w-4" aria-hidden="true" />
+        </Link>
+      ) : (
+        <span className="inline-flex h-10 cursor-not-allowed items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-100 px-3 text-sm text-zinc-400">
+          <span className="hidden sm:inline">Next</span>
+          <ChevronRight className="h-4 w-4" aria-hidden="true" />
+        </span>
+      )}
+
+      <p className="ml-3 text-sm text-zinc-500">
+        {totalItems} total items
+      </p>
     </nav>
   );
 }
