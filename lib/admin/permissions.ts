@@ -5,6 +5,9 @@ const ROLES = {
 } as const;
 
 export function assertSuperAdmin(role?: string | null) {
+  if (!role) {
+    throw new Error("Unauthorized");
+  }
   if (role !== ROLES.SUPER_ADMIN) {
     throw new Error("Forbidden");
   }

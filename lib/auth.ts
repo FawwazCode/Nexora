@@ -65,6 +65,11 @@ export const {
           return null;
         }
 
+        if (!user.isActive) {
+          console.log("❌ Akun ter-nonaktifkan");
+          return null;
+        }
+
         // Bandingkan password dengan hash di database
         const isValid = await compare(
           password,
@@ -81,14 +86,14 @@ export const {
           return null;
         }
 
-        console.log("✅ LOGIN BERHASIL");
+        console.log("✅ LOGIN BERHASIL. Role resolved:", user.role);
 
         // Data ini akan masuk ke JWT
         return {
           id: user.id,
           name: user.name,
           email: user.email,
-          role: user.role,
+          role: String(user.role),
         };
       },
     }),

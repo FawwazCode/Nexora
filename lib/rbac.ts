@@ -114,19 +114,23 @@ export function canAccessRoute(
     return true;
   }
 
-  // User must have a role.
+  // User must be logged in.
   if (!role) {
     return false;
   }
 
-  // Customer routes can be accessed by logged-in users.
+  // Customer routes (/customer, /cart, /checkout, /orders, /profile, /payment)
   if (isCustomerRoute(normalized)) {
     return true;
   }
 
-  // Admin API routes.
+  // Admin API routes (/api/admin/*)
   if (isAdminApiRoute(normalized)) {
-    // Product-related API.
+    if (role === ROLE.CUSTOMER) {
+      return false;
+    }
+
+    // Product & Inventory catalog APIs
     if (
       normalized === "/api/admin/products" ||
       normalized.startsWith("/api/admin/products/") ||
@@ -142,7 +146,7 @@ export function canAccessRoute(
       return canManageProducts(role);
     }
 
-    // Order-related API.
+    // Order & Shipping APIs
     if (
       normalized === "/api/admin/orders" ||
       normalized.startsWith("/api/admin/orders/") ||
@@ -154,54 +158,26 @@ export function canAccessRoute(
       return canManageOrders(role);
     }
 
-    // Other admin APIs are Super Admin only.
+    // Admin Dashboard API
+    if (normalized === "/api/admin/dashboard") {
+      return role === ROLE.SUPER_ADMIN || role === ROLE.CATALOG_ADMIN || role === ROLE.ORDER_SPECIALIST;
+    }
+
+    // Other admin APIs (users, reports, settings) are Super Admin only.
     return role === ROLE.SUPER_ADMIN;
   }
 
-  // Product dashboard pages.
-  if (
-    normalized === "/dashboard/products" ||
-    normalized.startsWith("/dashboard/products/")
-  ) {
-    return canManageProducts(role);
-  }
-
-  // Category dashboard pages.
-  if (
-    normalized === "/dashboard/categories" ||
-    normalized.startsWith("/dashboard/categories/")
-  ) {
-    return canManageProducts(role);
-  }
-
-  // Brand dashboard pages.
-  if (
-    normalized === "/dashboard/brands" ||
-    normalized.startsWith("/dashboard/brands/")
-  ) {
-    return canManageProducts(role);
-  }
-
-  // Variant dashboard pages.
-  if (
-    normalized === "/dashboard/variants" ||
-    normalized.startsWith("/dashboard/variants/")
-  ) {
-    return canManageProducts(role);
-  }
-
-  // Dashboard routes.
+  // Dashboard pages (/dashboard/*)
   if (isDashboardRoute(normalized)) {
-    if (role === ROLE.SUPER_ADMIN) {
-      return true;
-    }
-
     if (role === ROLE.CUSTOMER) {
       return false;
     }
 
-    const allowedDashboardRoutes =
-      dashboardAccessByRole[role];
+    if (role === ROLE.SUPER_ADMIN) {
+      return true;
+    }
+
+    const allowedDashboardRoutes = dashboardAccessByRole[role];
 
     if (!allowedDashboardRoutes) {
       return false;
@@ -212,7 +188,7 @@ export function canAccessRoute(
     );
   }
 
-  // Other authenticated routes.
+  // Default for authenticated routes
   return true;
 }
 
@@ -226,72 +202,31 @@ export function getDashboardRedirect(
     return null;
   }
 
-  // Not logged in / no role.
+  // Not logged in -> Redirect to login page
   if (!role) {
-    return "/";
+    return "/login";
   }
 
-  // Customer should use customer dashboard.
+  // Customer should use customer dashboard
   if (role === ROLE.CUSTOMER) {
     return "/customer";
   }
 
-  // Product dashboard permissions.
-  if (
-    normalized === "/dashboard/products" ||
-    normalized.startsWith("/dashboard/products/")
-  ) {
-    return canManageProducts(role)
-      ? null
-      : "/dashboard";
-  }
-
-  // Category dashboard permissions.
-  if (
-    normalized === "/dashboard/categories" ||
-    normalized.startsWith("/dashboard/categories/")
-  ) {
-    return canManageProducts(role)
-      ? null
-      : "/dashboard";
-  }
-
-  // Brand dashboard permissions.
-  if (
-    normalized === "/dashboard/brands" ||
-    normalized.startsWith("/dashboard/brands/")
-  ) {
-    return canManageProducts(role)
-      ? null
-      : "/dashboard";
-  }
-
-  // Variant dashboard permissions.
-  if (
-    normalized === "/dashboard/variants" ||
-    normalized.startsWith("/dashboard/variants/")
-  ) {
-    return canManageProducts(role)
-      ? null
-      : "/dashboard";
-  }
-
-  // Super Admin can access all dashboard routes.
+  // Super Admin can access all dashboard routes
   if (role === ROLE.SUPER_ADMIN) {
     return null;
   }
 
-  const allowedDashboardRoutes =
-    dashboardAccessByRole[role];
+  // Check if role is permitted to view the requested dashboard route
+  const allowedDashboardRoutes = dashboardAccessByRole[role];
 
   if (
-    !allowedDashboardRoutes ||
-    allowedDashboardRoutes.some((route) =>
-      matchesPath(normalized, route)
-    )
+    allowedDashboardRoutes &&
+    allowedDashboardRoutes.some((route) => matchesPath(normalized, route))
   ) {
     return null;
   }
 
+  // Unauthorized admin route -> redirect to role's main dashboard
   return "/dashboard";
 }

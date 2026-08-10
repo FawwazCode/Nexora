@@ -1,6 +1,12 @@
 import type { NextAuthConfig } from "next-auth";
 
 const authConfig = {
+  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "nexora-production-secret-key-placeholder",
+  trustHost: true,
+  session: {
+    strategy: "jwt",
+  },
+
   pages: {
     signIn: "/login",
   },
@@ -10,7 +16,8 @@ const authConfig = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = (user as { role?: string }).role;
+        token.id = user.id;
+        token.role = (user as { role?: string }).role || "CUSTOMER";
       }
 
       return token;
@@ -18,17 +25,8 @@ const authConfig = {
 
     async session({ session, token }) {
       if (session.user) {
-        const sessionUser = session.user as {
-          id?: string;
-          role?: string;
-        };
-
-        sessionUser.id = token.sub ?? undefined;
-
-        sessionUser.role =
-          typeof token.role === "string"
-            ? token.role
-            : undefined;
+        session.user.id = (token.sub ?? token.id ?? "") as string;
+        session.user.role = (typeof token.role === "string" ? token.role : "CUSTOMER") as string;
       }
 
       return session;

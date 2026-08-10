@@ -15,7 +15,7 @@ export async function GET() {
     return NextResponse.json(settings);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unexpected error";
-    const status = message === "Forbidden" ? 403 : 500;
+    const status = message === "Unauthorized" ? 401 : message === "Forbidden" ? 403 : 500;
     return NextResponse.json({ message }, { status });
   }
 }
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     return NextResponse.json(settings);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unexpected error";
-    const status = message === "Forbidden" ? 403 : 500;
+    const status = message === "Unauthorized" ? 401 : message === "Forbidden" ? 403 : 500;
     return NextResponse.json({ message }, { status });
   }
 }

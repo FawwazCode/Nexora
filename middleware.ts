@@ -13,32 +13,21 @@ const { auth } = NextAuth(authConfig);
 
 export default auth(async (request) => {
   const { pathname } = request.nextUrl;
+  const session = request.auth;
+  const role = (session?.user as { role?: string } | undefined)?.role;
 
-  if (pathname === "/") {
-    return NextResponse.next();
+  // 1. If user is already authenticated and visits /login or /register, redirect to their home
+  if (session?.user && (pathname === "/login" || pathname === "/register")) {
+    const targetUrl = role === "CUSTOMER" ? "/customer" : "/dashboard";
+    return NextResponse.redirect(new URL(targetUrl, request.url));
   }
 
+  // 2. Allow public routes (e.g. /, /products, /categories, /about, /login, /register, /api/auth)
   if (isPublicRoute(pathname)) {
     return NextResponse.next();
   }
 
-  const session = request.auth;
-
-  const role = (
-    session?.user as { role?: string } | undefined
-  )?.role;
-
-  const dashboardRedirect = getDashboardRedirect(
-    pathname,
-    role
-  );
-
-  if (dashboardRedirect) {
-    return NextResponse.redirect(
-      new URL(dashboardRedirect, request.url)
-    );
-  }
-
+  // 3. If user is not authenticated:
   if (!session?.user) {
     if (pathname.startsWith("/api/")) {
       return NextResponse.json(
@@ -52,16 +41,26 @@ export default auth(async (request) => {
     );
   }
 
+  // 4. Authenticated role redirection for dashboard routes
+  const dashboardRedirect = getDashboardRedirect(pathname, role);
+  if (dashboardRedirect) {
+    return NextResponse.redirect(
+      new URL(dashboardRedirect, request.url)
+    );
+  }
+
+  // 5. Enforce fine-grained RBAC permissions
   if (!canAccessRoute(pathname, role)) {
     if (pathname.startsWith("/api/")) {
       return NextResponse.json(
-        { message: "Forbidden" },
+        { message: "Forbidden: Access denied" },
         { status: 403 }
       );
     }
 
+    const fallbackUrl = role === "CUSTOMER" ? "/customer" : "/dashboard";
     return NextResponse.redirect(
-      new URL("/", request.url)
+      new URL(fallbackUrl, request.url)
     );
   }
 

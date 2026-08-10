@@ -59,7 +59,19 @@ export default function LoginForm() {
         if (result.ok) {
           toast.success("Login berhasil!");
 
-          router.push("/dashboard");
+          // Fetch resolved session to get user role
+          const sessionRes = await fetch("/api/auth/session");
+          const sessionData = await sessionRes.json();
+          const role = sessionData?.user?.role;
+
+          console.log("🔑 Resolved Session Role after login:", role);
+
+          if (role === "CUSTOMER") {
+            router.push("/customer");
+          } else {
+            router.push("/dashboard");
+          }
+
           router.refresh();
         }
       } catch (error) {
