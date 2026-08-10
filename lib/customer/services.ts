@@ -219,123 +219,141 @@ export async function createOrderFromCart(
     notes?: string;
   }
 ) {
-  return prisma.$transaction(async (tx) => {
-    const cart = await tx.cart.findUnique({
-      where: { userId },
-      include: {
-        items: {
-          include: {
-            variant: {
-              include: { product: true },
+  return prisma.$transaction(
+    async (tx) => {
+      const cart = await tx.cart.findUnique({
+        where: { userId },
+        include: {
+          items: {
+            include: {
+              variant: {
+                include: { product: true },
+              },
             },
           },
         },
-      },
-    });
-
-    if (!cart || cart.items.length === 0) {
-      throw new Error("Your cart is empty");
-    }
-
-    for (const item of cart.items) {
-      const currentVariant = await tx.productVariant.findUnique({
-        where: { id: item.variantId },
-        include: { product: true },
       });
 
-      if (!currentVariant || !currentVariant.isActive) {
-        throw new Error("Stock has changed. Please review your cart.");
+      if (!cart || cart.items.length === 0) {
+        throw new Error("Your cart is empty");
       }
 
-      if (!currentVariant.product || !currentVariant.product.isPublished || currentVariant.product.isDeleted) {
-        throw new Error("Stock has changed. Please review your cart.");
+      for (const item of cart.items) {
+        const variant = item.variant;
+
+        if (!variant || !variant.isActive) {
+          throw new Error("Stock has changed. Please review your cart.");
+        }
+
+        if (!variant.product || !variant.product.isPublished || variant.product.isDeleted) {
+          throw new Error("Stock has changed. Please review your cart.");
+        }
+
+        if (variant.stock < item.quantity) {
+          throw new Error("Stock has changed. Please review your cart.");
+        }
       }
 
-      if (currentVariant.stock < item.quantity) {
-        throw new Error("Stock has changed. Please review your cart.");
-      }
-    }
+      const subtotalNumber = cart.items.reduce(
+        (sum, item) => sum + item.quantity * Number(item.variant.price),
+        0
+      );
 
-    const subtotalNumber = cart.items.reduce(
-      (sum, item) => sum + item.quantity * Number(item.variant.price),
-      0
-    );
+      const shippingCostNumber = 0; // Default shipping cost
+      const grandTotalNumber = subtotalNumber + shippingCostNumber;
 
-    const shippingCostNumber = 0; // Default shipping cost
-    const grandTotalNumber = subtotalNumber + shippingCostNumber;
-
-    const address = await tx.address.create({
-      data: {
-        userId,
-        label: "Shipping Address",
-        receiverName: checkoutData.receiverName,
-        phone: checkoutData.phone,
-        province: checkoutData.province,
-        city: checkoutData.city,
-        district: checkoutData.district || "District",
-        postalCode: checkoutData.postalCode,
-        fullAddress: checkoutData.fullAddress,
-        isDefault: false,
-      },
-    });
-
-    const now = new Date();
-    const dateStr = now.toISOString().slice(0, 10).replace(/-/g, "");
-    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-    const orderNumber = `NXR-${dateStr}-${randomSuffix}`;
-
-    const order = await tx.order.create({
-      data: {
-        userId,
-        addressId: address.id,
-        orderNumber,
-        subtotal: subtotalNumber,
-        shippingCost: shippingCostNumber,
-        grandTotal: grandTotalNumber,
-        status: OrderStatus.PENDING,
-        paymentStatus: PaymentStatus.PENDING,
-        shipmentStatus: ShipmentStatus.NOT_YET_SHIPPED,
-      },
-    });
-
-    for (const item of cart.items) {
-      const unitPrice = item.variant.price;
-
-      await tx.orderItem.create({
+      const address = await tx.address.create({
         data: {
-          orderId: order.id,
-          variantId: item.variantId,
-          quantity: item.quantity,
-          price: unitPrice,
-        },
-      });
-
-      const updatedVariant = await tx.productVariant.update({
-        where: { id: item.variantId },
-        data: {
-          stock: { decrement: item.quantity },
-        },
-      });
-
-      await tx.stockMovement.create({
-        data: {
-          variantId: item.variantId,
           userId,
-          type: StockMovementType.OUT,
-          quantity: item.quantity,
-          stockBefore: updatedVariant.stock + item.quantity,
-          stockAfter: updatedVariant.stock,
-          note: `Customer Order ${orderNumber}`,
+          label: "Shipping Address",
+          receiverName: checkoutData.receiverName,
+          phone: checkoutData.phone,
+          province: checkoutData.province,
+          city: checkoutData.city,
+          district: checkoutData.district || "District",
+          postalCode: checkoutData.postalCode,
+          fullAddress: checkoutData.fullAddress,
+          isDefault: false,
         },
       });
-    }
 
-    await tx.cartItem.deleteMany({
-      where: { cartId: cart.id },
-    });
+      const now = new Date();
+      const dateStr = now.toISOString().slice(0, 10).replace(/-/g, "");
+      const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+      const orderNumber = `NXR-${dateStr}-${randomSuffix}`;
 
-    return order;
-  });
+      const order = await tx.order.create({
+        data: {
+          userId,
+          addressId: address.id,
+          orderNumber,
+          subtotal: subtotalNumber,
+          shippingCost: shippingCostNumber,
+          grandTotal: grandTotalNumber,
+          status: OrderStatus.PENDING,
+          paymentStatus: PaymentStatus.PENDING,
+          shipmentStatus: ShipmentStatus.NOT_YET_SHIPPED,
+          items: {
+            createMany: {
+              data: cart.items.map((item) => ({
+                variantId: item.variantId,
+                quantity: item.quantity,
+                price: item.variant.price,
+              })),
+            },
+          },
+        },
+      });
+
+      for (const item of cart.items) {
+        const updateResult = await tx.productVariant.updateMany({
+          where: {
+            id: item.variantId,
+            isActive: true,
+            stock: {
+              gte: item.quantity,
+            },
+          },
+          data: {
+            stock: {
+              decrement: item.quantity,
+            },
+          },
+        });
+
+        if (updateResult.count === 0) {
+          throw new Error("Stock has changed. Please review your cart.");
+        }
+
+        const freshVariant = await tx.productVariant.findUnique({
+          where: { id: item.variantId },
+          select: { stock: true },
+        });
+
+        const stockAfter = freshVariant?.stock ?? 0;
+        const stockBefore = stockAfter + item.quantity;
+
+        await tx.stockMovement.create({
+          data: {
+            variantId: item.variantId,
+            userId,
+            type: StockMovementType.OUT,
+            quantity: item.quantity,
+            stockBefore,
+            stockAfter,
+            note: `Customer Order ${orderNumber}`,
+          },
+        });
+      }
+
+      await tx.cartItem.deleteMany({
+        where: { cartId: cart.id },
+      });
+
+      return order;
+    },
+    { maxWait: 5000, timeout: 10000 }
+  );
 }
 
 export async function processManualPayment(userId: string, orderId: string, amountInput: number) {
