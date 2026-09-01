@@ -21,14 +21,14 @@ export function AboutHero() {
   return (
     <section className="relative overflow-hidden bg-white">
       <div className="absolute left-1/2 top-0 -z-10 h-96 w-96 -translate-x-1/2 rounded-full bg-[#7F46FA]/10 blur-3xl" />
-      <div className="mx-auto grid min-h-[calc(100svh-5rem)] max-w-7xl items-center gap-12 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:px-8 lg:py-24">
+      <div className="mx-auto grid min-h-[calc(100svh-8rem)] max-w-7xl items-center gap-10 px-4 py-12 sm:px-6 sm:py-16 lg:min-h-[calc(100svh-5rem)] lg:grid-cols-2 lg:gap-12 lg:px-8 lg:py-24">
         <div className="max-w-2xl">
           <div className="inline-flex items-center gap-2 rounded-full border border-[#7F46FA]/20 bg-[#7F46FA]/10 px-4 py-2 text-sm font-medium text-[#6035D2]">
             <Sparkles className="h-4 w-4" aria-hidden="true" />
             About Nexora
           </div>
 
-          <h1 className="mt-7 text-5xl font-semibold tracking-tight text-zinc-950 sm:text-6xl lg:text-7xl">
+          <h1 className="mt-7 text-4xl font-semibold tracking-tight text-zinc-950 sm:text-5xl lg:text-7xl">
             Technology Meets Premium Shopping
           </h1>
 
@@ -41,14 +41,14 @@ export function AboutHero() {
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
             <Link
               href="/products"
-              className="inline-flex h-12 items-center justify-center rounded-xl bg-[#7F46FA] px-6 text-sm font-semibold text-white shadow-lg shadow-[#7F46FA]/20 transition hover:-translate-y-0.5 hover:bg-[#6D3BE3] active:translate-y-0"
+              className="inline-flex h-12 w-full items-center justify-center rounded-xl bg-[#7F46FA] px-6 text-sm font-semibold text-white shadow-lg shadow-[#7F46FA]/20 transition hover:-translate-y-0.5 hover:bg-[#6D3BE3] active:translate-y-0 sm:w-auto"
             >
               Explore Products
               <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
             </Link>
             <Link
               href="/contact"
-              className="inline-flex h-12 items-center justify-center rounded-xl border border-zinc-200 bg-white px-6 text-sm font-semibold text-zinc-950 shadow-sm transition hover:-translate-y-0.5 hover:border-[#7F46FA]/30 hover:bg-zinc-50 active:translate-y-0"
+              className="inline-flex h-12 w-full items-center justify-center rounded-xl border border-zinc-200 bg-white px-6 text-sm font-semibold text-zinc-950 shadow-sm transition hover:-translate-y-0.5 hover:border-[#7F46FA]/30 hover:bg-zinc-50 active:translate-y-0 sm:w-auto"
             >
               Contact Us
             </Link>
@@ -58,7 +58,7 @@ export function AboutHero() {
         <div className="relative">
           <div className="absolute -right-6 top-10 h-32 w-32 rounded-full bg-[#7F46FA]/20 blur-3xl" />
           <div className="absolute -left-4 bottom-10 h-24 w-24 rounded-full bg-fuchsia-300/20 blur-2xl" />
-          <div className="relative overflow-hidden rounded-[2rem] border border-zinc-200 bg-white shadow-2xl shadow-[#7F46FA]/10">
+          <div className="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl shadow-[#7F46FA]/10 sm:rounded-[2rem]">
             <Image
               src={heroImage}
               alt="Premium ecommerce technology illustration"

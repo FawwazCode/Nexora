@@ -13,7 +13,7 @@ export function HeroContent() {
     <div className="mx-auto flex max-w-2xl flex-col items-center text-center lg:mx-0 lg:items-start lg:text-left">
       <HeroBadge />
 
-      <h1 className="mt-7 max-w-4xl text-5xl font-semibold tracking-tight text-zinc-950 sm:text-6xl lg:text-7xl">
+      <h1 className="mt-7 max-w-4xl text-4xl font-semibold tracking-tight text-zinc-950 sm:text-6xl lg:text-7xl">
         Discover the Future of Technology
       </h1>
 
@@ -26,7 +26,7 @@ export function HeroContent() {
         <HeroButtons />
       </div>
 
-      <dl className="mt-12 grid w-full max-w-md grid-cols-3 gap-3 sm:gap-6">
+      <dl className="mt-12 grid w-full max-w-md grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-6">
         {stats.map((stat) => (
           <div
             key={stat.label}

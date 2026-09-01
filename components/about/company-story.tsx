@@ -16,9 +16,9 @@ const storyImage = `data:image/svg+xml;utf8,${encodeURIComponent(`
 
 export function CompanyStory() {
   return (
-    <section className="bg-white px-4 py-20 sm:px-6 lg:px-8">
-      <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-2">
-        <div className="overflow-hidden rounded-[2rem] border border-zinc-200 bg-zinc-50 shadow-xl shadow-zinc-950/[0.04]">
+    <section className="bg-white px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
+      <div className="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-2 lg:gap-12">
+        <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-50 shadow-xl shadow-zinc-950/[0.04] sm:rounded-[2rem]">
           <Image
             src={storyImage}
             alt="Nexora premium shopping experience"

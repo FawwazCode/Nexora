@@ -8,6 +8,7 @@ import { MissionVision } from "@/components/about/mission-vision";
 import { Statistics } from "@/components/about/statistics";
 import { Team } from "@/components/about/team";
 import { WhyChooseUs } from "@/components/about/why-choose-us";
+import ContextualBackLink from "@/components/navigation/contextual-back-link";
 
 export const metadata: Metadata = {
   title: "About Nexora | Premium Tech Store",
@@ -18,6 +19,9 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <main className="min-h-screen bg-white">
+      <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
+        <ContextualBackLink />
+      </div>
       <AboutHero />
       <CompanyStory />
       <MissionVision />

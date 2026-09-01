@@ -19,7 +19,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import RegisterHeader from "./register-header";
-import SocialLogin from "@/app/login/components/social-login";
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -70,7 +69,7 @@ export default function RegisterForm() {
 
   return (
     <Card className="border-0 shadow-xl">
-      <CardContent className="space-y-6 p-8">
+      <CardContent className="space-y-6 p-5 sm:p-8">
         <RegisterHeader
           title="Create Account"
           description="Create your Nexora account to start shopping."
@@ -132,12 +131,13 @@ export default function RegisterForm() {
                 onClick={() =>
                   setShowPassword((prev) => !prev)
                 }
-                className="absolute right-3 top-1/2 -translate-y-1/2"
+                className="absolute right-1 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-lg text-gray-400 transition hover:bg-zinc-100 active:scale-95"
+                aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (
-                  <EyeOff className="h-5 w-5 text-gray-400" />
+                  <EyeOff className="h-5 w-5" />
                 ) : (
-                  <Eye className="h-5 w-5 text-gray-400" />
+                  <Eye className="h-5 w-5" />
                 )}
               </button>
             </div>
@@ -172,12 +172,17 @@ export default function RegisterForm() {
                 onClick={() =>
                   setShowConfirmPassword((prev) => !prev)
                 }
-                className="absolute right-3 top-1/2 -translate-y-1/2"
+                className="absolute right-1 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-lg text-gray-400 transition hover:bg-zinc-100 active:scale-95"
+                aria-label={
+                  showConfirmPassword
+                    ? "Hide confirm password"
+                    : "Show confirm password"
+                }
               >
                 {showConfirmPassword ? (
-                  <EyeOff className="h-5 w-5 text-gray-400" />
+                  <EyeOff className="h-5 w-5" />
                 ) : (
-                  <Eye className="h-5 w-5 text-gray-400" />
+                  <Eye className="h-5 w-5" />
                 )}
               </button>
             </div>
@@ -204,8 +209,6 @@ export default function RegisterForm() {
             )}
           </Button>
         </form>
-
-        <SocialLogin />
 
         <div className="flex flex-col gap-2 text-center text-sm">
           <Link href="/" className="font-medium text-[#7F46FA] hover:underline">

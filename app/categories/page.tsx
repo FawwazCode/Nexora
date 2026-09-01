@@ -8,6 +8,8 @@ import {
   Watch,
 } from "lucide-react";
 
+import ContextualBackLink from "@/components/navigation/contextual-back-link";
+
 type Category = {
   title: string;
   description: string;
@@ -52,7 +54,7 @@ function CategoryCard({ title, description, icon: Icon }: Category) {
     <button
       type="button"
       aria-label={`Shop ${title}`}
-      className="group flex h-full cursor-pointer flex-col items-start rounded-lg border border-zinc-200 bg-white p-5 text-left shadow-sm shadow-zinc-950/[0.03] transition duration-300 hover:-translate-y-1 hover:border-[#7F46FA]/40 hover:shadow-xl hover:shadow-[#7F46FA]/10 active:scale-[0.98]"
+      className="group flex h-full min-h-44 cursor-pointer flex-col items-start rounded-lg border border-zinc-200 bg-white p-4 text-left shadow-sm shadow-zinc-950/[0.03] transition duration-300 hover:-translate-y-1 hover:border-[#7F46FA]/40 hover:shadow-xl hover:shadow-[#7F46FA]/10 active:scale-[0.98] sm:p-5"
     >
       <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-zinc-100 text-zinc-900 transition duration-300 group-hover:bg-[#7F46FA] group-hover:text-white">
         <Icon className="h-6 w-6" aria-hidden="true" />
@@ -73,9 +75,13 @@ export function Categories() {
   return (
     <section
       aria-labelledby="categories-heading"
-      className="bg-white px-4 py-20 sm:px-6 lg:px-8"
+      className="bg-white px-4 py-14 sm:px-6 sm:py-20 lg:px-8"
     >
       <div className="mx-auto max-w-7xl">
+        <div className="mb-8">
+          <ContextualBackLink />
+        </div>
+
         <div className="mx-auto max-w-2xl text-center">
           <h2
             id="categories-heading"
@@ -88,7 +94,7 @@ export function Categories() {
           </p>
         </div>
 
-        <div className="mt-12 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+        <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:mt-12 lg:grid-cols-6">
           {categories.map((category) => (
             <CategoryCard key={category.title} {...category} />
           ))}

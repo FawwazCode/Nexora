@@ -176,12 +176,12 @@ export default async function DashboardPage() {
             <h3 className="text-lg font-semibold text-gray-900">Recent Orders</h3>
             <div className="mt-4 space-y-3">
               {recentOrders.map((order) => (
-                <div key={order.id} className="flex items-center justify-between rounded-lg border border-gray-100 p-3">
-                  <div>
+                <div key={order.id} className="flex flex-col gap-3 rounded-lg border border-gray-100 p-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
                     <p className="font-medium text-gray-900">{order.orderNumber}</p>
                     <p className="text-sm text-gray-500">{order.user?.name ?? order.user?.email ?? "Customer"}</p>
                   </div>
-                  <div className="text-right">
+                  <div className="sm:text-right">
                     <p className="font-medium text-gray-900">${Number(order.grandTotal).toFixed(2)}</p>
                     <p className="text-sm text-gray-500">{order.paymentStatus}</p>
                   </div>
@@ -194,10 +194,10 @@ export default async function DashboardPage() {
             <h3 className="text-lg font-semibold text-gray-900">Recent Customers</h3>
             <div className="mt-4 space-y-3">
               {recentCustomers.map((customer) => (
-                <div key={customer.id} className="flex items-center justify-between rounded-lg border border-gray-100 p-3">
-                  <div>
+                <div key={customer.id} className="flex flex-col gap-3 rounded-lg border border-gray-100 p-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
                     <p className="font-medium text-gray-900">{customer.name ?? customer.email}</p>
-                    <p className="text-sm text-gray-500">{customer.email}</p>
+                    <p className="break-all text-sm text-gray-500">{customer.email}</p>
                   </div>
                   <span className="text-sm text-gray-500">{customer.isActive ? "Active" : "Disabled"}</span>
                 </div>
@@ -214,10 +214,10 @@ export default async function DashboardPage() {
             <h3 className="text-lg font-semibold text-gray-900">Low Stock Products</h3>
             <div className="mt-4 space-y-3">
               {lowStockProducts.map((variant) => (
-                <div key={variant.id} className="flex items-center justify-between rounded-lg border border-gray-100 p-3">
-                  <div>
+                <div key={variant.id} className="flex flex-col gap-3 rounded-lg border border-gray-100 p-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
                     <p className="font-medium text-gray-900">{variant.product?.name}</p>
-                    <p className="text-sm text-gray-500">SKU {variant.sku}</p>
+                    <p className="break-all text-sm text-gray-500">SKU {variant.sku}</p>
                   </div>
                   <p className="font-medium text-amber-600">{variant.stock} left</p>
                 </div>
@@ -229,10 +229,10 @@ export default async function DashboardPage() {
             <h3 className="text-lg font-semibold text-gray-900">Best Selling Products</h3>
             <div className="mt-4 space-y-3">
               {bestSellingProducts.map((variant) => (
-                <div key={variant.id} className="flex items-center justify-between rounded-lg border border-gray-100 p-3">
-                  <div>
+                <div key={variant.id} className="flex flex-col gap-3 rounded-lg border border-gray-100 p-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
                     <p className="font-medium text-gray-900">{variant.product?.name}</p>
-                    <p className="text-sm text-gray-500">SKU {variant.sku}</p>
+                    <p className="break-all text-sm text-gray-500">SKU {variant.sku}</p>
                   </div>
                   <p className="font-medium text-[#7F46FA]">{variant.soldQuantity} sold</p>
                 </div>
@@ -261,4 +261,4 @@ export default async function DashboardPage() {
       </div>
     </div>
   );
-}
+}

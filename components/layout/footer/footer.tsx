@@ -113,15 +113,15 @@ export default function Footer() {
             <ul className="mt-5 space-y-4 text-sm text-zinc-300">
               <li className="flex items-start gap-3">
                 <Mail className="mt-0.5 h-4 w-4 shrink-0 text-[#a78bfa]" />
-                <span>support@nexora.com</span>
+                <span>hirogest23@gmail.com</span>
               </li>
               <li className="flex items-start gap-3">
                 <Phone className="mt-0.5 h-4 w-4 shrink-0 text-[#a78bfa]" />
-                <span>+1 (800) 555-0198</span>
+                <span>+6285939859097</span>
               </li>
               <li className="flex items-start gap-3">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#a78bfa]" />
-                <span>1480 Market Street, San Francisco, CA 94102</span>
+                <span>Jl. Pangkalan Jati IV</span>
               </li>
             </ul>
 

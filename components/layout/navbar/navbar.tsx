@@ -50,12 +50,12 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-md">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
+      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
         {/* Logo */}
-        <Logo />
+        <Logo className="shrink-0" />
 
         {/* Desktop Menu */}
-        <nav className="hidden items-center gap-8 md:flex">
+        <nav className="hidden items-center gap-5 md:flex lg:gap-8">
           <Link href="/" className="text-sm font-medium transition hover:text-[#7F46FA]">
             Home
           </Link>
@@ -81,9 +81,9 @@ export default function Navbar() {
         </nav>
 
         {/* Right Side */}
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden min-w-0 items-center gap-2 md:flex lg:gap-3">
           {/* Search */}
-          <div className="relative">
+          <div className="relative hidden lg:block">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <Input placeholder="Search products..." className="w-64 pl-10" />
           </div>
@@ -122,22 +122,37 @@ export default function Navbar() {
           <Sheet>
             <SheetTrigger
               render={
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" className="h-10 w-10">
                   <Menu className="h-6 w-6" />
                 </Button>
               }
             />
 
-            <SheetContent side="right">
-              <div className="mt-8 flex flex-col gap-5">
-                <Link href="/">Home</Link>
-                <Link href="/products">Products</Link>
-                <Link href="/cart" className="flex items-center gap-2">
+            <SheetContent
+              side="right"
+              className="w-[min(20rem,calc(100vw-2rem))] max-w-[calc(100vw-2rem)] px-5"
+            >
+              <div className="mt-10 flex flex-col gap-2">
+                <Link href="/" className="rounded-lg px-2 py-3 text-sm font-medium transition hover:bg-zinc-100">
+                  Home
+                </Link>
+                <Link href="/products" className="rounded-lg px-2 py-3 text-sm font-medium transition hover:bg-zinc-100">
+                  Products
+                </Link>
+                <Link href="/cart" className="flex items-center gap-2 rounded-lg px-2 py-3 text-sm font-medium transition hover:bg-zinc-100">
                   Cart {cartCount > 0 && <Badge className="bg-[#7F46FA] text-white">{cartCount}</Badge>}
                 </Link>
-                {isAuthenticated && <Link href="/orders">My Orders</Link>}
-                <Link href="/categories">Categories</Link>
-                <Link href="/about">About</Link>
+                {isAuthenticated && (
+                  <Link href="/orders" className="rounded-lg px-2 py-3 text-sm font-medium transition hover:bg-zinc-100">
+                    My Orders
+                  </Link>
+                )}
+                <Link href="/categories" className="rounded-lg px-2 py-3 text-sm font-medium transition hover:bg-zinc-100">
+                  Categories
+                </Link>
+                <Link href="/about" className="rounded-lg px-2 py-3 text-sm font-medium transition hover:bg-zinc-100">
+                  About
+                </Link>
 
                 {isAuthenticated ? (
                   <div className="mt-5">
@@ -145,7 +160,7 @@ export default function Navbar() {
                   </div>
                 ) : (
                   <Link href="/login">
-                    <Button className="mt-5 bg-[#7F46FA] hover:bg-[#6D35F5]">Login</Button>
+                    <Button className="mt-5 h-11 w-full bg-[#7F46FA] hover:bg-[#6D35F5]">Login</Button>
                   </Link>
                 )}
               </div>

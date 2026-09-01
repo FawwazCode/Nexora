@@ -8,7 +8,7 @@ export default function AuthLayout({
   children,
 }: AuthLayoutProps) {
   return (
-    <div className="grid min-h-screen lg:grid-cols-2">
+    <div className="grid min-h-svh lg:grid-cols-2">
 
       {/* Left */}
 
@@ -35,7 +35,7 @@ export default function AuthLayout({
 
       {/* Right */}
 
-      <div className="flex items-center justify-center bg-gray-50 p-6">
+      <div className="flex items-center justify-center bg-gray-50 px-4 py-8 sm:p-6">
 
         <div className="w-full max-w-md">
 
